@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{4112F058-606C-4B26-8CAD-45D5608C66C5}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>GenCodeConsole</RootNamespace>
+    <AssemblyName>GenCodeConsole</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="abpGenCode.cs" />
+    <Compile Include="cmd.cs" />
+    <Compile Include="EditCsproj.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Template\abpTemplate\application\Dto\ModelMapProfile.txt" />
+    <Content Include="Template\abpTemplate\application\Dto\ModelDto.txt" />
+    <Content Include="Template\abpTemplate\application\Dto\CreateModelDto.txt" />
+    <Content Include="Template\abpTemplate\application\IService.txt" />
+    <Content Include="Template\abpTemplate\domain\MapConfig.txt" />
+    <Content Include="Template\Model2.txt" />
+    <Content Include="Template\abpTemplate\application\Service.txt" />
+    <Content Include="Template\CURD\Controller.txt" />
+    <Content Include="Template\CURD\ControllerConfig.txt" />
+    <Content Include="Template\CURD\Create.txt" />
+    <Content Include="Template\CURD\DTO\AddDTO.txt" />
+    <Content Include="Template\CURD\DTO\AddDTOMapping.txt" />
+    <Content Include="Template\CURD\DTO\AddDTOUpdateMapping.txt" />
+    <Content Include="Template\CURD\DTO\DTOMapping.txt" />
+    <Content Include="Template\CURD\DTO\DTOUpdateMapping.txt" />
+    <Content Include="Template\CURD\DTO\EditDTO.txt" />
+    <Content Include="Template\CURD\DTO\EditDTOMapping.txt" />
+    <Content Include="Template\CURD\DTO\EditDTOUpdateMapping.txt" />
+    <Content Include="Template\CURD\DTO\InfoDTO.txt" />
+    <Content Include="Template\CURD\DTO\InfoDTOMapping.txt" />
+    <Content Include="Template\CURD\DTO\InfoDTOUpdateMapping.txt" />
+    <Content Include="Template\CURD\DTO\ListDTO.txt" />
+    <Content Include="Template\CURD\Edit.txt" />
+    <Content Include="Template\CURD\Info.txt" />
+    <Content Include="Template\CURD\ListPage.txt" />
+    <Content Include="Template\Data\Domain.txt" />
+    <Content Include="Template\Data\MapConfig.txt" />
+    <Content Include="Template\Data\MapConfig1.txt" />
+    <Content Include="Template\Data\Repositories.txt" />
+    <Content Include="Template\Data\RepositoriesConfig.txt" />
+    <Content Include="Template\InfoDTO.txt" />
+    <Content Include="Template\abpTemplate\domain\Model.txt" />
+    <Content Include="Template\Model.txt" />
+    <Content Include="Template\Service\ApplicationConfig.txt" />
+    <Content Include="Template\Service\IService.txt" />
+    <Content Include="Template\Service\Service.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Lilee.GeneratorCore\Lilee.GeneratorCore.csproj">
+      <Project>{e98c9112-7790-49e2-a773-b8e9d4ca9065}</Project>
+      <Name>Lilee.GeneratorCore</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

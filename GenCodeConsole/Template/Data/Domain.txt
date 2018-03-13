@@ -1,0 +1,22 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ output extension=".txt" #>
+<#@ parameter name="parameter1" type="Lilee.GeneratorCore.Parameter" #>
+<#
+	    string UpperName = parameter1.GetUpperName(parameter1.TableName);
+        string LowerName = parameter1.GetLowerName(parameter1.TableName);
+		string TableName = parameter1.TableName;
+#> 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Domain.Core;
+using System.Linq.Expressions;
+
+namespace Domain.Bounded
+{
+    public interface I<#= UpperName #>Repository : IRepository<<#= TableName #>>
+    {
+        bool IsExist(Expression<Func<<#= parameter1.TableName #>, bool>> exp);
+    }
+}

@@ -1,0 +1,106 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ output extension=".cs" #>
+<#@ import namespace="System.Linq" #>
+<#@ parameter name="DbHelper" type="Lilee.GeneratorCore.DbHelper" #>
+<#@ parameter name="config" type="Lilee.GeneratorCore.config" #>
+<#@ parameter name="parameter1" type="Lilee.GeneratorCore.Parameter" #>
+using Infrastructure.Data.Core;
+using Domain.Bounded;
+
+<#
+	    string TableName = parameter1.TableName;
+#>  
+namespace Infrastructure.Data.Bounded
+{
+    public class <#= TableName #>Map : MappingBase<<#= TableName #>>
+    {
+        public <#= TableName #>Map()
+        {
+            // Primary Key
+            this.HasKey(t => t.Id);
+
+<#
+	string PrimaryKey = string.Empty;
+	foreach (var column in DbHelper.GetDbColumns(config.ConnectionString, config.DbDatabase, TableName))
+    {
+	    if (column.ColumnName == "IsDelete" || column.ColumnName == "CreateTime") continue;
+	    if (column.IsPrimaryKey)
+        {
+	        PrimaryKey = column.ColumnName;
+	#>			// Properties
+			this.Property(t => t.Id)
+				.IsRequired()
+				.HasMaxLength(32)
+				.HasColumnName("<#= column.ColumnName #>");
+
+<#      }
+	    else if (column.CSharpType == "string")
+		{
+#>
+			this.Property(t => t.<#= column.ColumnName #>)
+                <#=!column.IsNullable ? 
+				@".IsRequired()
+				.HasMaxLength(" + column.CharLength + ");" : 
+                ".HasMaxLength(" + column.CharLength + ");" #>
+
+<#
+		}
+	}
+#>
+            // Table & Column Mappings
+            this.ToTable("<#= TableName #>");
+	<#
+	foreach (var column in DbHelper.GetDbColumns(config.ConnectionString, config.DbDatabase, TableName))
+    {
+	    if (column.IsPrimaryKey) continue;
+		if(column.ColumnName == "ISDELETE" )
+		{
+			#>
+		this.Property(t => t.IsDelete).HasColumnName("<#= column.ColumnName #>").HasColumnType("odp_internal_use_type");
+	  <#
+	  continue;
+		}
+		if(column.ColumnName == "CREATETIME" )
+		{
+			#>
+		this.Property(t => t.CreateTime).HasColumnName("<#= column.ColumnName #>");
+	  <#
+	  continue;
+		}
+		if(column.CSharpType == "bool"){
+	  #>
+		this.Property(t => t.<#= column.ColumnName #>).HasColumnName("<#= column.ColumnName #>").HasColumnType("odp_internal_use_type");
+	  <#
+	  }
+	  else{
+	  #>
+		this.Property(t => t.<#= column.ColumnName #>).HasColumnName("<#= column.ColumnName #>");
+	  <#
+	  }
+    }
+	#>
+            
+<#
+	foreach (var column in DbHelper.GetTableFK(config.ConnectionString, config.DbDatabase, TableName))
+    {
+	    var Fk = DbHelper.GetDbColumns(config.ConnectionString, config.DbDatabase, TableName).Where(p => p.ColumnName == column.Column).First().IsNullable;
+	  #>
+			this.<#= Fk ? "HasOptional" : "HasRequired" #>(p => p.<#= column.FkTableName #>).WithMany().HasForeignKey(p => p.<#= column.Column #>);
+	  <#
+    }
+	#>
+<#
+	foreach (var column in DbHelper.GetFKTable(config.ConnectionString, config.DbDatabase, TableName))
+    {
+	    var Fkcolumn = DbHelper.GetDbColumns(config.ConnectionString, config.DbDatabase, column.TableName).Where(p => p.ColumnName == PrimaryKey).FirstOrDefault();
+        bool Fk = false;
+        if (Fkcolumn != null)
+	        Fk = Fkcolumn.IsNullable;
+	  #>
+		this.HasMany(p => p.<#= column.TableName #>s).<#= Fk ? "WithOptional" : "WithRequired" #>(t=>t.<#= TableName #>).HasForeignKey(p=>p.<#= PrimaryKey #>);
+	  <#
+    }
+	#>
+	}
+    }
+}

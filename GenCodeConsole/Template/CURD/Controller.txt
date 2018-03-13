@@ -1,0 +1,109 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ output extension=".txt" #>
+<#@ parameter name="parameter1" type="Lilee.GeneratorCore.Parameter" #>
+using Application.Bounded.DTO;
+using Application.Bounded.<#= parameter1.GetUpperName(parameter1.TableName) #>;
+using Domain.Bounded;
+using Stbis.Common;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Web.Script.Serialization;
+
+namespace LiLeeMvc.Controllers.SysAdmin
+{
+    public class <#= parameter1.GetUpperName(parameter1.TableName) #>Controller : Controller
+    {
+        public I<#= parameter1.GetUpperName(parameter1.TableName) #>Service <#= parameter1.GetLowerName(parameter1.TableName) #>Service { get; set; }
+
+        //
+        // GET: /Sys<#= parameter1.GetUpperName(parameter1.TableName) #>/
+
+        public ActionResult Index()
+        {
+            return View();
+        }
+
+		public ActionResult Info()
+        {
+            return View();
+        }
+
+        public ActionResult Create()
+        {
+            return View();
+        }
+
+        public ActionResult Edit()
+        {
+            return View();
+        }
+
+        public JsonResult GetGridList(FormCollection form)
+        {
+            int _pageIndex , _pageTotal = 0, _pageCount = 10;
+            var jser = new JavaScriptSerializer();
+			FilterGroup group = new FilterGroup();
+            int.TryParse(form["page"], out _pageIndex);
+            int.TryParse(form["rows"], out _pageCount);
+            string where = form["where"];
+              
+            //界面上传过来的条件
+            if (!string.IsNullOrEmpty(where))
+            {
+                group = jser.Deserialize<FilterGroup>(where);
+            }
+
+            IList<<#= parameter1.GetUpperName(parameter1.TableName) #>ListDTO> list = <#= parameter1.GetLowerName(parameter1.TableName) #>Service.GridList(_pageIndex - 1, _pageCount, out _pageTotal, group);
+
+            return Json(new { total = _pageTotal, rows = list });
+        }
+
+		public JsonResult Get(string Id)
+        {
+            if (string.IsNullOrEmpty(Id))
+            {
+                return Json(new { success = false, msg = "未找到主键的值！" });
+            }
+
+            <#= parameter1.GetUpperName(parameter1.TableName) #>InfoDTO dto = <#= parameter1.GetLowerName(parameter1.TableName) #>Service.GetModelById(Id);
+
+            return Json(new { success = true, data = dto });
+        }
+
+        [HttpPost]
+        public JsonResult Create(<#= parameter1.GetUpperName(parameter1.TableName) #>AddDTO dto)
+        {
+            bool success = <#= parameter1.GetLowerName(parameter1.TableName) #>Service.Add(dto);
+            return Json(new { success = success, message = "添加成功！" }, "text/html");
+        }
+
+        [HttpPost]
+        public JsonResult Edit(<#= parameter1.GetUpperName(parameter1.TableName) #>EditDTO dto)
+        {
+            bool success = <#= parameter1.GetLowerName(parameter1.TableName) #>Service.Edit(dto);
+            return Json(new { success = true, message = "修改成功！" });
+        }
+
+		public JsonResult Delete(string Id)
+        {
+            if (string.IsNullOrEmpty(Id))
+            {
+                return Json(new { result = false, msg = "未找到主键的值！" });
+            }
+
+            bool result = <#= parameter1.GetLowerName(parameter1.TableName) #>Service.Disabled(Id);
+
+            if (result)
+            {
+                return Json(new { result = true, msg = "删除成功！" });
+            }
+            else
+            {
+                return Json(new { result = false, msg = "删除失败！" });
+            }
+        }
+	}
+}

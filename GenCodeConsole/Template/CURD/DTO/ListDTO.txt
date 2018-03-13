@@ -1,0 +1,37 @@
+﻿<#@ template language="C#" #>
+<#@ parameter name="DbHelper" type="Lilee.GeneratorCore.DbHelper" #>
+<#@ parameter name="config" type="Lilee.GeneratorCore.config" #>
+<#@ parameter name="parameter1" type="Lilee.GeneratorCore.Parameter" #>
+<#
+	    string className = parameter1.GetUpperName(parameter1.TableName);
+        string lowerName = parameter1.GetLowerName(parameter1.TableName);
+#>using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace Application.Bounded.DTO
+{
+    public class <#= className #>ListDTO
+    {
+		/// <summary>
+        /// 主键
+        /// </summary>
+		public string Id { set; get; }
+	<#
+				var GridColumns = parameter1.page.DgColumns;
+				foreach (var column in GridColumns)
+				{
+			#>
+		/// <summary>
+        /// <#= column.CHName #>
+        /// </summary>
+		public <#= !column.IsNullable.Value || column.CSharpType == "string" ? column.CSharpType : "Nullable<" + column.CSharpType + ">" #> <#= column.ColumnDtoName #> { set; get; }
+<#                                                                            
+	}
+#>
+    }
+}
+
+		
+

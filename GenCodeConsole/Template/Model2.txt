@@ -1,0 +1,105 @@
+﻿<#@ template language="C#" #>
+<#@ parameter name="DbHelper" type="Lilee.GeneratorCore.DbHelper" #>
+<#@ parameter name="config" type="Lilee.GeneratorCore.config" #>
+<#@ parameter name="parameter1" type="Lilee.GeneratorCore.Parameter" #>
+using System;
+using Domain.Core;
+using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
+
+<#
+	    string UpperName = parameter1.GetUpperName(parameter1.TableName);
+        string LowerName = parameter1.GetLowerName(parameter1.TableName);
+		string TableName = parameter1.TableName;
+		string DatabaseName = parameter1.DatabaseName;
+#>  
+namespace Domain.Bounded
+{
+    public class <#= TableName #> : Entity,IValidatableObject
+	{
+		#region Model
+<#
+	foreach (var column in DbHelper.GetDbColumns(config.ConnectionString, DatabaseName, TableName))
+	{
+	    if (column.IsPrimaryKey || column.ColumnName == "IsDelete" || column.ColumnName == "CreateTime")
+	        continue;
+#>		/// <summary>
+        /// <#= column.Remark #>
+        /// </summary>
+		public <#= !column.IsNullable || column.CSharpType == "string" ? column.CSharpType : "Nullable<" + column.CSharpType + ">" #> <#= column.ColumnName #> { set; get; }
+<#                                                                            
+	}
+#>
+
+<#
+	foreach (var table in DbHelper.GetTableFK(config.ConnectionString, DatabaseName, TableName))
+	{
+#>		public virtual <#= table.FkTableName #> <#= table.FkTableName #> { set; get; }
+<#                                                                            
+	}
+#>
+		#endregion
+
+		#region Method
+        /// <summary>
+        /// 禁用/删除
+        /// </summary>
+        public void Disabled()
+        {
+            IsDelete = true;
+        }
+        #endregion
+
+        #region IValidatableObject Members
+
+        /// <summary>
+        /// 验证
+        /// </summary>
+        /// <param name="validationContext">描述执行验证的上下文</param>
+        /// <returns>返回错误列表</returns>
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            var validationResults = new List<ValidationResult>();
+			#region 非空验证
+		<#
+		foreach (var column in DbHelper.GetDbColumns(config.ConnectionString, DatabaseName, TableName))
+		{
+	        if (column.IsPrimaryKey || column.ColumnName == "IsDelete" || column.ColumnName == "CreateTime" || column.IsNullable)
+				continue;
+            var strIF = string.Empty;
+            if (column.CSharpType == "string")
+	            strIF = string.Format("string.IsNullOrEmpty({0})", column.ColumnName);
+            if (column.CSharpType == "int")
+	            strIF = string.Format("{0} > 0", column.ColumnName);
+            if (column.CSharpType == "DateTime" || column.CSharpType == "bool")
+	            strIF = string.Format("{0} != null", column.ColumnName);
+		#>	if (<#= strIF #>)
+				validationResults.Add(new ValidationResult("<#= column.Remark #>不能为空！", new string[] { "<#= column.ColumnName #>" }));
+		<#    
+        }
+		#>
+	#endregion
+
+			#region 最大长度验证
+		<#
+		foreach (var column in DbHelper.GetDbColumns(config.ConnectionString, DatabaseName, TableName))
+		{
+	        if (column.IsPrimaryKey || column.ColumnName == "IsDelete" || column.ColumnName == "CreateTime")
+				continue;
+
+	        if (column.CSharpType == "string"){
+	            if (column.CharLength < 0) continue;
+		#>
+	if(<#= column.ColumnName #> != null && <#= column.ColumnName #>.Length > <#= column.CharLength #>)
+				validationResults.Add(new ValidationResult("<#= column.Remark #>超出最大长度！", new string[] { "<#= column.ColumnName #>" }));
+		<#
+			}
+		}
+		#>
+	#endregion
+            return validationResults;
+        }
+
+        #endregion
+	}
+}
