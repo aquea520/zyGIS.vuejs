@@ -4,7 +4,7 @@
     <el-input style='width:300px;' placeholder="请输入字段名称" prefix-icon="el-icon-document" v-model="clnname"></el-input>
     <el-button style='margin-bottom:20px;' type="primary" icon="document" :loading="downloadLoading" @click="fetchData()">{{$t('table.search')}}</el-button>
     <el-button class="filter-item" style="margin-left: 10px;" @click="handleCreate" type="primary" icon="el-icon-edit">{{$t('table.add')}}</el-button>
-    <el-table :data="list" v-loading.body="listLoading" element-loading-text="拼命加载中" @sort-change="sortChange" stripe border fit highlight-current-row>
+    <el-table :data="list" v-loading.body="listLoading" element-loading-text="拼命加载中" @sort-change="sortChange" @row-dblclick="rowClick" stripe border fit highlight-current-row>
       <el-table-column align="center" label='序号' width="65">
         <template slot-scope="scope">
           {{scope.$index+1}}
@@ -50,9 +50,14 @@
         </template>
       </el-table-column>
     </el-table>
+
     <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage" :page-sizes="[10, 20, 30, 40]" :page-size="pageSize" layout="total, sizes, ->,prev, pager, next, jumper" :total="totalCount">
     </el-pagination>
+
     <CreateOrUpdate :formId="temp.id" :formVisiable="dialogFormVisible" :formStatus="dialogStatus" v-on:visiable-change="OnVisiableChange"></CreateOrUpdate>
+
+    <Detail :formId="temp.id" :detailVisiable="detailVisiable" v-on:visiable-change="handleDetail"></Detail>
+
   </div>
 </template>
 
@@ -65,11 +70,13 @@ import {
 } from "@/api/article";
 
 import { default as CreateOrUpdate } from "./CreateOrUpdate";
+import { default as Detail } from "./Detail";
 
 export default {
   name: "RightTable",
   components: {
-    CreateOrUpdate
+    CreateOrUpdate,
+    Detail
   },
   computed: {
     skipCount: function() {
@@ -101,7 +108,8 @@ export default {
         isIdentity: false
       },
       dialogFormVisible: false,
-      dialogStatus: ""
+      dialogStatus: "",
+      detailVisiable:false
     };
   },
   created() {
@@ -137,6 +145,9 @@ export default {
       if (!visiable && status == "") {
         this.fetchData();
       }
+    },
+    handleDetail: function(visiable) {
+      this.detailVisiable = visiable;
     },
     handleCreate() {
       this.dialogFormVisible = true;
@@ -182,6 +193,10 @@ export default {
       var sortBy = column.order == "descending" ? "DESC" : "ASC";
       this.sort = column.prop + " " + sortBy;
       this.fetchData();
+    },
+    rowClick(row){
+      this.temp = Object.assign({}, row); // copy obj
+      this.detailVisiable = true;
     }
   }
 };

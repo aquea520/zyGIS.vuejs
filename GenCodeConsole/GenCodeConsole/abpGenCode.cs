@@ -9,7 +9,7 @@ namespace GenCodeConsole
 {
     public static class abpGenCode
     {
-        public static string SLN_Path = @"F:\3.4.1\aspnet-core\";
+        public static string SLN_Path = @"E:\03实现\zyGIS\zyGIS\";
         public static string Application_Path = @"src\zyGIS.Application\";
         public static string Domain_Path = @"src\zyGIS.Core\";
         public static string EF_Path = @"src\zyGIS.EntityFrameworkCore\";
@@ -22,7 +22,7 @@ namespace GenCodeConsole
         public static void GenCode() {
             Console.WriteLine("请输入要生成的表名：");
             string tableName = Console.ReadLine();
-            string databaseName = "EF_TEST";
+            string databaseName = "zyGISDb";
             ListPage page = new ListPage("", "", "");//GreateListPageFromUI(rows, tableName);
             List<KeyValuePair<string, object>> arg = new List<KeyValuePair<string, object>>();
             arg.Add(new KeyValuePair<string, object>(
