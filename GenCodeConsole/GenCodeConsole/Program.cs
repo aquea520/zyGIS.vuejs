@@ -12,6 +12,7 @@ namespace GenCodeConsole
     {
         static void Main(string[] args)
         {
+            //123
             abpGenCode.GenCode();
         }
 
