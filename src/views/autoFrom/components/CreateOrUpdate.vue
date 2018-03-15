@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <el-dialog :title="textMap[status]" :visible.sync="visiable">
-      <el-form :rules="rules" ref="dataForm" :model="temp" label-position="left" label-width="70px" style='width: 500px; margin-left:50px;'>
+      <el-form :rules="rules" ref="dataForm" :model="temp" label-position="right" label-width="90px" style='width: 600px; margin-left:10px;'>
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="字段名" prop="columnName">
@@ -10,33 +10,41 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="数据类型" prop="columnType">
-              <el-input placeholder="Please input" v-model="temp.columnType">
+            <el-form-item label="中文名称" prop="columnCNName">
+              <el-input placeholder="Please input" v-model="temp.columnCNName">
               </el-input>
             </el-form-item>
           </el-col>
         </el-row>
-        <el-row :gutter="20">
+        <el-row :gutter="10">
           <el-col :span="12">
+            <el-form-item label="数据类型" prop="columnType">
+              <el-select v-model="temp.columnType" filterable allow-create placeholder="请选择" @change="OnElChange">
+                <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="6" v-if="temp.columnType.indexOf('numeric') >= 0">
             <el-form-item label="字节长度" prop="byteLength">
               <el-input placeholder="Please input" v-model.number="temp.byteLength">
               </el-input>
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+          <el-col :span="6" v-if="temp.columnType.indexOf('varchar') >= 0">
             <el-form-item label="字符长度" prop="charLength">
               <el-input placeholder="Please input" v-model.number="temp.charLength">
               </el-input>
             </el-form-item>
           </el-col>
-        </el-row>
-        <el-row :gutter="20">
-          <el-col :span="12">
+          <el-col :span="6" v-if="temp.columnType.indexOf('numeric') >= 0">
             <el-form-item label="精度" prop="scale">
               <el-input placeholder="Please input" v-model.number="temp.scale">
               </el-input>
             </el-form-item>
           </el-col>
+        </el-row>
+        <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="默认值" prop="defaultValue">
               <el-input placeholder="Please input" v-model="temp.defaultValue">
@@ -44,14 +52,14 @@
 
             </el-form-item>
           </el-col>
-        </el-row>
-        <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="允许空" prop="isNullable">
               <el-switch v-model="temp.isNullable">
               </el-switch>
             </el-form-item>
           </el-col>
+        </el-row>
+        <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="主键" prop="isPrimaryKey">
               <el-switch v-model="temp.isPrimaryKey">
@@ -110,6 +118,7 @@ export default {
         id: "",
         dbId: -1,
         columnName: "",
+        columnCNName: "",
         columnType: "",
         byteLength: -1,
         charLength: -1,
@@ -124,20 +133,47 @@ export default {
         update: "编辑",
         create: "新增"
       },
+      options: [
+        {
+          value: "int",
+          label: "int"
+        },
+        {
+          value: "nvarchar(50)",
+          label: "nvarchar(50)"
+        },
+        {
+          value: "bit",
+          label: "bit"
+        },
+        {
+          value: "numeric(18,0)",
+          label: "numeric(18,0)"
+        },
+        {
+          value: "uniqueidentifier",
+          label: "uniqueidentifier"
+        }
+      ],
       rules: {
         columnName: [
           { required: true, message: "请输入字段名", trigger: "blur" },
           { max: 50, message: "长度在50 个字符以内", trigger: "blur" }
         ],
-        byteLength:[
-          { type: 'number', message: '字节长度必须为数字值'}
+        columnCNName: [
+          { required: true, message: "请输入中文名称", trigger: "blur" },
+          { max: 50, message: "长度在50 个字符以内", trigger: "blur" }
         ],
-        charLength:[
-          { type: 'number', message: '字符长度必须为数字值'}
+        columnType: [
+          { required: true, message: "请选择数据类型", trigger: "blur" }
         ],
-        scale:[
-          { type: 'number', message: '精度必须为数字值'}
-        ]
+        byteLength: [
+          { required: true, type: "number", message: "字节长度必须为数字值" }
+        ],
+        charLength: [
+          { required: true, type: "number", message: "字符长度必须为数字值" }
+        ],
+        scale: [{ required: true, type: "number", message: "精度必须为数字值" }]
       }
     };
   },
@@ -210,6 +246,21 @@ export default {
       }
 
       this.$emit("visiable-change", false, "cancel");
+    },
+    OnElChange: function(val) {
+      this.temp.charLength = -1;
+      this.temp.byteLength = -1;
+      this.scale = -1;
+
+      var pattern = /\(([^()]+)\)/g;
+      var result = pattern.exec(val)[1];
+      if (val.indexOf("varchar") >= 0) {
+        this.temp.charLength = parseInt(result);
+      } else if (val.indexOf("numeric") >= 0) {
+        var arr = result.split(",");
+        this.temp.byteLength = parseInt(arr[0]);
+        this.temp.scale = parseInt(arr[1]);
+      }
     }
   }
 };

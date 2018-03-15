@@ -17,14 +17,14 @@
           <el-tag v-if="scope.row.isIdentity">自增</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="中文名" prop="columnCNName" sortable="custom" width="200" align="center">
+      <el-table-column label="中文名" prop="columnCNName" sortable="custom" width="100" align="center">
         <template slot-scope="scope">
           {{scope.row.columnCNName}}
         </template>
       </el-table-column>
-      <el-table-column label="数据类型" prop="ColumnType" sortable="custom" width="150" align="center">
+      <el-table-column label="数据类型" prop="ColumnType" sortable="custom" width="130" align="center">
         <template slot-scope="scope">
-          {{scope.row.columnType + (scope.row.byteLength == -1 ? "" : "("+ scope.row.byteLength + (scope.row.scale == -1 ? "" : "," + scope.row.scale) +")") + (scope.row.charLength == -1 ? "" : "("+ scope.row.charLength +")")}}
+          {{scope.row.columnType }}
         </template>
       </el-table-column>
       <el-table-column label="默认值" prop="DefaultValue" sortable="custom" width="105" align="center">
@@ -97,6 +97,7 @@ export default {
         id: "",
         dbId: -1,
         columnName: "",
+        columnCNName: "",
         columnType: "",
         byteLength: -1,
         charLength: -1,
