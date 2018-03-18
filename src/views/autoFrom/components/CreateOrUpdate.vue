@@ -1,6 +1,7 @@
 <template>
   <div class="container">
     <el-dialog :title="textMap[status]" :visible.sync="visiable">
+      
       <el-form :rules="rules" ref="dataForm" :model="temp" label-position="right" label-width="90px" style='width: 600px; margin-left:10px;'>
         <el-row :gutter="20">
           <el-col :span="12">
@@ -19,7 +20,7 @@
         <el-row :gutter="10">
           <el-col :span="12">
             <el-form-item label="数据类型" prop="columnType">
-              <el-select v-model="temp.columnType" filterable allow-create placeholder="请选择" @change="OnElChange">
+              <el-select v-model="selVal" filterable allow-create placeholder="请选择" @change="OnElChange">
                 <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
                 </el-option>
               </el-select>
@@ -103,6 +104,10 @@ export default {
       type: String,
       default: null
     },
+    formPId: {
+      type: String,
+      default: null
+    },
     formStatus: {
       type: String,
       default: ""
@@ -116,7 +121,7 @@ export default {
     return {
       temp: {
         id: "",
-        dbId: -1,
+        dbId: "",
         columnName: "",
         columnCNName: "",
         columnType: "",
@@ -196,12 +201,39 @@ export default {
         if (this.formVisiable) {
           this.$nextTick(() => {
             this.$refs["dataForm"].resetFields();
+            this.temp.dbId = this.formPId;
           });
         }
         return this.formVisiable;
       },
       set: function(val) {
         this.cancel();
+      }
+    },
+    selVal: {
+      get: function() {
+        if (this.temp.columnType && this.temp.columnType != "") {
+          if (this.temp.charLength >= 0) {
+            return this.temp.columnType + "(" + this.temp.charLength + ")";
+          } else if (this.temp.byteLength >= 0) {
+            return (
+              this.temp.columnType +
+              "(" +
+              this.temp.byteLength +
+              "," +
+              this.temp.scale +
+              ")"
+            );
+          }
+        }
+        return this.temp.columnType;
+      },
+      set: function(val) {
+        if (val.indexOf("(") >= 0) {
+          this.temp.columnType = val.substr(0, val.indexOf("("));
+        } else {
+          this.temp.columnType = val;
+        }
       }
     }
   },
@@ -210,7 +242,7 @@ export default {
       this.$refs["dataForm"].validate(valid => {
         if (valid) {
           createArticle(this.temp).then(() => {
-            this.$emit("visiable-change", false, "");
+            this.$emit("cu-visiable-change", false, "", this.temp);
             this.$message({
               type: "success",
               message: "创建成功!"
@@ -223,7 +255,7 @@ export default {
       this.$refs["dataForm"].validate(valid => {
         if (valid) {
           updateArticle(this.temp).then(() => {
-            this.$emit("visiable-change", false, "");
+            this.$emit("cu-visiable-change", false, "", this.temp);
             this.$message({
               type: "success",
               message: "更新成功!"
@@ -233,19 +265,27 @@ export default {
       });
     },
     cancel: function() {
-      if (this.formStatus == "create") {
-        this.$message({
-          type: "info",
-          message: "已取消新增"
-        });
-      } else if (this.formStatus == "update") {
-        this.$message({
-          type: "info",
-          message: "已取消修改"
-        });
-      }
-
-      this.$emit("visiable-change", false, "cancel");
+      this.$confirm("是否放弃数据的修改?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
+          if (this.formStatus == "create") {
+            this.$message({
+              type: "info",
+              message: "已取消新增"
+            });
+            this.$emit("cu-visiable-change", false, "cancel", this.temp);
+          } else if (this.formStatus == "update") {
+            this.$message({
+              type: "info",
+              message: "已取消修改"
+            });
+          }
+          this.$emit("cu-visiable-change", false, "cancel", this.temp);
+        })
+        .catch(() => {});
     },
     OnElChange: function(val) {
       this.temp.charLength = -1;
@@ -253,13 +293,16 @@ export default {
       this.scale = -1;
 
       var pattern = /\(([^()]+)\)/g;
-      var result = pattern.exec(val)[1];
-      if (val.indexOf("varchar") >= 0) {
-        this.temp.charLength = parseInt(result);
-      } else if (val.indexOf("numeric") >= 0) {
-        var arr = result.split(",");
-        this.temp.byteLength = parseInt(arr[0]);
-        this.temp.scale = parseInt(arr[1]);
+      if (val.indexOf("(") >= 0) {
+        var arrResult = pattern.exec(val);
+        var result = arrResult[1];
+        if (val.indexOf("varchar") >= 0) {
+          this.temp.charLength = parseInt(result);
+        } else if (val.indexOf("numeric") >= 0) {
+          var arr = result.split(",");
+          this.temp.byteLength = parseInt(arr[0]);
+          this.temp.scale = parseInt(arr[1]);
+        }
       }
     }
   }

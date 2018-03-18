@@ -9,6 +9,22 @@ export function fetchColumnList(query) {
   })
 }
 
+export function fetchSchema(query) {
+  return request({
+    url: '/TableConfigService/GetSchema',
+    method: 'get',
+    params: query
+  })
+}
+
+export function fetchTreeNode(query) {
+  return request({
+    url: '/DataDictionaryService/GetTreeData',
+    method: 'get',
+    params: query
+  })
+}
+
 export function fetchModelById(query) {
   return request({
     url: '/TableConfigService/Get',

@@ -104,8 +104,9 @@ export default {
       title: "XXX详情",
       temp: {
         id: "",
-        dbId: -1,
+        dbId: "",
         columnName: "",
+        columnCNName: "",
         columnType: "",
         byteLength: -1,
         charLength: -1,
@@ -120,7 +121,7 @@ export default {
   },
   methods: {
     cancel: function() {
-      this.$emit("visiable-change", false);
+      this.$emit("detail-visiable-change", false);
     }
   }
 };
